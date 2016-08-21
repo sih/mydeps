@@ -1,13 +1,13 @@
 package eu.waldonia.mydeps;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Accept: application/vnd.github.v3+json
- * curl -H "Authorization: token d39e752ede51e8f3dda3f19f7df25d50042f2895" https://api.github.com/users/sih -I
- * curl -H "Authorization: token d39e752ede51e8f3dda3f19f7df25d50042f2895" "https://api.github.com/user/repos?visibility=all&affiliation=owner,collaborator" -I
- * curl -H "Authorization: token d39e752ede51e8f3dda3f19f7df25d50042f2895" "https://api.github.com/user/repos?visibility=all&affiliation=collaborator"
- * curl -H "Authorization: token d39e752ede51e8f3dda3f19f7df25d50042f2895" -H "Accept: application/vnd.github.v3.raw" "https://api.github.com/repos/sih/mydeps/contents/pom.xml"
+ * Some of the curls that correspond to the methods in this class.
+ * curl -H "Authorization: token <token>" https://api.github.com/users/sih -I
+ * curl -H "Authorization: token <token>" "https://api.github.com/user/repos?visibility=all&affiliation=owner,collaborator" -I
+ * curl -H "Authorization: token <token>" "https://api.github.com/user/repos?visibility=all&affiliation=collaborator"
+ * curl -H "Authorization: token <token>" -H "Accept: application/vnd.github.v3.raw" "https://api.github.com/repos/sih/mydeps/contents/pom.xml"
  */
 public class GitHubReader {
 
@@ -36,13 +36,14 @@ public class GitHubReader {
 
     private static final String NAME_KEY = "name";
     private static final String API_URL_KEY = "url";
+    private static final String POM_FINDER = "/contents/pom.xml";
 
 
     public GitHubReader() {
         http = HttpClients.createDefault();
     }
 
-    private Logger LOGGER = LoggerFactory.getLogger(GitHubReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GitHubReader.class);
 
     Map<String,String> readRepos(String gitUser, String oauthToken) {
         LOGGER.info("Reading repos for user "+gitUser);
@@ -67,8 +68,8 @@ public class GitHubReader {
             JsonNode items = mapper.readTree(jsonRepos);
 
             for(JsonNode item: items) {
-                String name = item.get(NAME_KEY).getTextValue();
-                String url = item.get(API_URL_KEY).getTextValue();
+                String name = item.get(NAME_KEY).asText();
+                String url = item.get(API_URL_KEY).asText();
 
                 LOGGER.debug(name+" => "+url);
                 repoDetails.put(name,url);
@@ -86,11 +87,47 @@ public class GitHubReader {
     }
 
 
+    String fetchPom(String repoUrl, String oauthToken) {
+        String pomFile = null;
+        if (repoUrl != null) {
+
+            String url = repoUrl+POM_FINDER;
+            LOGGER.info("Looking for a POM in "+url);
+
+            HttpGet get = new HttpGet(url);
+            get.setHeader("Authorization", "token "+oauthToken);
+            get.setHeader("Accept", RAW_OUTPUT);
+
+            try (CloseableHttpResponse response = http.execute(get)) {
+
+                if (200 == response.getStatusLine().getStatusCode()) {
+                    StringWriter writer = new StringWriter();
+                    HttpEntity entity = response.getEntity();
+                    IOUtils.copy(entity.getContent(),writer, Charset.forName("utf-8"));
+
+                    pomFile = writer.toString();
+                }
+            }
+            catch (IOException ioe) {
+                LOGGER.error(ioe.getMessage());
+            }
+
+        }
+
+        return pomFile;
+    }
 
 
     public static void main(String[] args) {
         GitHubReader g = new GitHubReader();
-        g.readRepos(args[0], args[1]);
+        Map<String,String> repos = g.readRepos(args[0], args[1]);
+        String mydeps = repos.get("LookWhoPosts");
+        LOGGER.info(mydeps);
+        String pom  = g.fetchPom(mydeps,args[1]);
+
+        if (pom != null) {
+            LOGGER.info(pom);
+        }
     }
 
 }

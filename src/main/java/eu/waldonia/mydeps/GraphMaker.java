@@ -44,7 +44,6 @@ public class GraphMaker {
      *      -[:VERSION]
      *  -(v:Version {number:\"${versionNumber}\"})"
      */
-
     public void update(Dependency d, String appName) {
 
         Map<String,String> valuesMap = new HashMap<>();
