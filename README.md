@@ -11,7 +11,8 @@ The graph captures:
 
 The utility uses both the [GitHub HTTP API](https://developer.github.com/v3/) and the [Maven Model library](http://maven.apache.org/ref/3.2.5/maven-model). 
 
-The picture below shows a processing pipeline 
+The picture below shows the processing pipeline 
+![Processing Pipeline](/images/process.png)
 
 ## Running the app
 
