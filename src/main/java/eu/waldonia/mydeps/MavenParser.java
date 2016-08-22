@@ -30,6 +30,12 @@ public class MavenParser {
         Model model = mavenReader.read(new StringReader(pom));
 
         dependencies =  model.getDependencies();
+
+        dependencies.forEach(d -> {
+            if (null == d.getScope()) d.setScope("compile");
+        });
+
+
         return dependencies;
     }
 }

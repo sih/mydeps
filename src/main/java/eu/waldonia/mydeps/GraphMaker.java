@@ -18,7 +18,8 @@ public class GraphMaker {
     private static final Logger LOGGER = LoggerFactory.getLogger(GraphMaker.class);
 
     private static final String MERGE_APP = "MERGE (a:App {name:\"${appName}\"})";
-    private static final String MERGE_ALL = "MATCH (a:App {name:\"${appName}\"}) MERGE (a)-[:DEPENDS_ON {scope:\"${scope}\"}]-(p:Provider {name:\"${providerName}\"})-[:PROVIDES]-(l:Artifact {name:\"${artifactName}\"})-[:VERSION]-(v:Version {number:\"${versionNumber}\"})";
+    private static final String MERGE_ARTIFACT = "MERGE (p:Provider {name:\"${providerName}\"})-[:PROVIDES]-(l:Artifact {name:\"${artifactName}\"})";
+    private static final String LINK = "MATCH (a:App {name:\"${appName}\"}), (l:Artifact {name:\"${artifactName}\"}) CREATE (a)-[:${scope} {version:\"${versionNumber}\"}]->(l)";
 
     private Driver driver;
     private Session session;
@@ -49,18 +50,20 @@ public class GraphMaker {
         Map<String,String> valuesMap = new HashMap<>();
         valuesMap.put("id",appName);
         valuesMap.put("appName",appName);
-        valuesMap.put("scope", d.getScope());
+        valuesMap.put("scope", d.getScope().toUpperCase());
         valuesMap.put("providerName", d.getGroupId());
         valuesMap.put("artifactName", d.getArtifactId());
         valuesMap.put("versionNumber", d.getVersion());
 
         StrSubstitutor sub = new StrSubstitutor(valuesMap);
         String mergeApp = sub.replace(MERGE_APP);
-        String mergeAll = sub.replace(MERGE_ALL);
+        String mergeArtifact = sub.replace(MERGE_ARTIFACT);
+        String link = sub.replace(LINK);
 
         Transaction tx = session.beginTransaction();
         tx.run(mergeApp);
-        tx.run(mergeAll);
+        tx.run(mergeArtifact);
+        tx.run(link);
         tx.success();
         tx.close();
     }
