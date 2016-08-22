@@ -27,5 +27,5 @@ You will need:
 * From the project directory and run ````java -jar ./target/mydeps-1.0-SNAPSHOT.jar <gituser> <oauth token> <neo4juser> <neo4jpass>````
 
 ## TODOs
-* Rewrite query to MERGE library details rather than create new
+* ~~Rewrite query to MERGE library details rather than create new~~
 * Queries to explore the graph
