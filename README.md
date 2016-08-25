@@ -28,7 +28,8 @@ You will need:
 * From the project directory and run ````java -jar ./target/mydeps-1.0-SNAPSHOT.jar <gituser> <oauth token> <neo4juser> <neo4jpass>````
 
 ## TODOs
-* ~~Rewrite query to MERGE library details rather than create new~~
+* ~~Rewrite populator to MERGE library details rather than create new~~
+* Rewrite populator to MERGE provider details rather than create new
 * Queries to explore the graph
   * What are the most commonly used libraries
   * Which projects "look similar" from a dependency perspective
