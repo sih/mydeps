@@ -30,3 +30,6 @@ You will need:
 ## TODOs
 * ~~Rewrite query to MERGE library details rather than create new~~
 * Queries to explore the graph
+  * What are the most commonly used libraries
+  * Which projects "look similar" from a dependency perspective
+  * Which projects use different versions of the same library
