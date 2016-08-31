@@ -35,16 +35,7 @@ public class GraphMaker {
         session = driver.session();
     }
 
-    /*
-     * MERGE
-     *  (a:App {name:\"${appName}\"})
-     *      -[:DEPENDS_ON, {scope:\"${scope}\"}]
-     *  -(p:Provider {name:\"${providerName}\"})
-     *      -[:PROVIDES]
-     *  -(l:Artifact {name:\"${artifactName}\"})
-     *      -[:VERSION]
-     *  -(v:Version {number:\"${versionNumber}\"})"
-     */
+
     public void update(Dependency d, String appName) {
 
         Map<String,String> valuesMap = new HashMap<>();
@@ -56,6 +47,7 @@ public class GraphMaker {
         valuesMap.put("versionNumber", d.getVersion());
 
         StrSubstitutor sub = new StrSubstitutor(valuesMap);
+
         String mergeApp = sub.replace(MERGE_APP);
         String mergeArtifact = sub.replace(MERGE_ARTIFACT);
         String link = sub.replace(LINK);
