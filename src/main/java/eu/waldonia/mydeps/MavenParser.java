@@ -31,8 +31,11 @@ public class MavenParser {
 
         dependencies =  model.getDependencies();
 
+
+
         dependencies.forEach(d -> {
             if (null == d.getScope()) d.setScope("compile");
+
         });
 
 
